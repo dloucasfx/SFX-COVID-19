@@ -130,7 +130,7 @@ def main():
     if sfx_ingest_endpoint is None:
         sfx_ingest_endpoint = "https://ingest.signalfx.com"
     sfx_ingest_client = get_sfx_ingest(sfx_access_token, sfx_ingest_endpoint)
-    sfx_corona = SFXCOVID19(confirmed_url, deaths_url, recovered_url, sfx_ingest_client, "/tmp/sfx_covid_19_lsd.json")
+    sfx_corona = SFXCOVID19(confirmed_url, deaths_url, recovered_url, sfx_ingest_client)
     sfx_corona.run()
 
 
