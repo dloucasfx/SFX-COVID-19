@@ -12,13 +12,14 @@ import sys
 
 class SFXCOVID19:
 
-    def __init__(self, confirmed_url, deaths_url, recovered_url, sfx_ingest_client, last_sync_file="/opt/sfx_covid_19_lsd.json"):
+    def __init__(self, confirmed_url, deaths_url, recovered_url, covid_version, sfx_ingest_client, last_sync_file="/opt/sfx_covid_19_lsd.json"):
         self.las_sync_file = last_sync_file
         self.last_sync = {}
         self.confirmed_url = confirmed_url
         self.deaths_url = deaths_url
         self.recovered_url = recovered_url
         self.sfx_ingest_client = sfx_ingest_client
+        self.covid_version = covid_version
 
     def run(self):
         if os.path.exists(self.las_sync_file):
@@ -50,7 +51,7 @@ class SFXCOVID19:
         pattern = re.compile(r"\d{1,2}-\d{1,2}-\d{1,2}")
         last_sync_metric = self.last_sync[metric]
         for item in csvDict:
-            dimensions = {"covid-version": "v1.0"}
+            dimensions = {"covid-version": self.covid_version}
             metrics = {}
             dps = []
             for k, v in item.items():
@@ -123,14 +124,15 @@ def main():
     recovered_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
 
     sfx_access_token = get_env("SFX_ACCESS_TOKEN")
-    if sfx_access_token is None:
-        print("SFX_ACCESS_TOKEN is missing, make sure to set it as env variable")
+    covid_version = get_env("COVID_VERSION")
+    if sfx_access_token is None or covid_version is None:
+        print("SFX_ACCESS_TOKEN and/or COVID_VERSION is missing, make sure to set it as env variable")
         exit(1)
     sfx_ingest_endpoint = get_env("INGEST_URL")
     if sfx_ingest_endpoint is None:
         sfx_ingest_endpoint = "https://ingest.signalfx.com"
     sfx_ingest_client = get_sfx_ingest(sfx_access_token, sfx_ingest_endpoint)
-    sfx_corona = SFXCOVID19(confirmed_url, deaths_url, recovered_url, sfx_ingest_client)
+    sfx_corona = SFXCOVID19(confirmed_url, deaths_url, recovered_url, covid_version, sfx_ingest_client)
     sfx_corona.run()
 
 
